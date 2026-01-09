@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <title>Backredirect • kwai</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f5f7;
+      color: #020617;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 16px 40px;
+    }
+
+    .page {
+      width: 100%;
+      max-width: 960px;
+      background: #ffffff;
+      border-radius: 16px;
+      box-shadow:
+        0 18px 40px rgba(15, 23, 42, 0.12),
+        0 0 0 1px rgba(148, 163, 184, 0.3);
+      padding: 24px;
+      backdrop-filter: blur(18px);
+    }
+
+    @media (min-width: 768px) {
+      .page {
+        padding: 32px 32px 28px;
+      }
+    }
+
+    .headline {
+      font-size: clamp(1.4rem, 2.1vw, 1.9rem);
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 6px;
+      color: #ff0050; /* kwai pink */
+    }
+
+    .subheadline {
+      font-size: 0.98rem;
+      text-align: center;
+      color: #4b5563;
+      opacity: 0.95;
+      margin-bottom: 18px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      color: #6b7280;
+      margin: 0 auto 14px;
+      background: #ffffff;
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.18);
+    }
+
+    .video-wrapper {
+      position: relative;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #000000;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      box-shadow:
+        0 14px 30px rgba(15, 23, 42, 0.18),
+        0 0 0 1px rgba(148, 163, 184, 0.28);
+      margin-bottom: 22px;
+    }
+
+    .video-wrapper::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: radial-gradient(circle at top, rgba(0, 242, 234, 0.18), transparent 60%);
+    }
+
+    .video-inner {
+      position: relative;
+      padding: 0;
+    }
+
+    .hint-text {
+      font-size: 0.8rem;
+      text-align: center;
+      color: #6b7280;
+      margin-top: 8px;
+      margin-bottom: 2px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 2.2fr) minmax(0, 1.4fr);
+      gap: 18px;
+      align-items: flex-start;
+      margin-top: 8px;
+    }
+
+    @media (max-width: 900px) {
+      .main-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    /* CHAT AO VIVO */
+
+    .chat-card {
+      background: #ffffff;
+      border-radius: 14px;
+      border: 1px solid #e5e7eb;
+      box-shadow: 0 12px 26px rgba(15, 23, 42, 0.08);
+      display: flex;
+      flex-direction: column;
+      min-height: 320px;
+      max-height: 420px;
+    }
+
+    .chat-header {
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #e5e7eb;
+      background: #f9fafb;
+    }
+
+    .chat-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #111827;
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.7rem;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(248, 113, 113, 0.12);
+      color: #b91c1c;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #ef4444;
+      box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.35);
+    }
+
+    .chat-beta {
+      font-size: 0.7rem;
+      color: #9ca3af;
+      opacity: 0.9;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 8px 10px 6px;
+      overflow-y: auto;
+      font-size: 0.82rem;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(148, 163, 184, 0.8) transparent;
+      background: #ffffff;
+    }
+
+    .chat-messages::-webkit-scrollbar {
+      width: 6px;
+    }
+    .chat-messages::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .chat-messages::-webkit-scrollbar-thumb {
+      background: rgba(148, 163, 184, 0.7);
+      border-radius: 999px;
+    }
+
+    .chat-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      margin-bottom: 6px;
+    }
+
+    .chat-avatar {
+      width: 22px;
+      height: 22px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #00f2ea, #ff0050);
+      font-size: 0.7rem;
+      color: #020617;
+      font-weight: 700;
+    }
+
+    .chat-content {
+      background: #f9fafb;
+      border-radius: 10px;
+      padding: 5px 8px;
+      border: 1px solid #e5e7ef;
+      box-shadow: 0 2px 6px rgba(148, 163, 184, 0.25);
+    }
+
+    .chat-name {
+      font-weight: 600;
+      color: #111827;
+      margin-bottom: 1px;
+    }
+
+    .chat-text {
+      color: #374151;
+      line-height: 1.35;
+    }
+
+    .user-message .chat-content {
+      border-color: rgba(0, 242, 234, 0.7);
+      background: rgba(191, 242, 255, 0.4);
+    }
+
+    .user-message .chat-name {
+      color: #0f766e;
+    }
+
+    .chat-input-area {
+      border-top: 1px solid #e5e7eb;
+      padding: 7px 8px 8px;
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      background: linear-gradient(
+        to right,
+        rgba(0, 242, 234, 0.06),
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 0, 80, 0.04)
+      );
+    }
+
+    .chat-input {
+      flex: 1;
+      border-radius: 999px;
+      border: 1px solid #d1d5db;
+      padding: 8px 12px;
+      background: #ffffff;
+      color: #111827;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.16s ease, box-shadow 0.16s ease, background 0.16s ease;
+    }
+
+    .chat-input::placeholder {
+      color: #9ca3af;
+    }
+
+    .chat-input:focus {
+      border-color: #00f2ea;
+      box-shadow: 0 0 0 1px rgba(0, 242, 234, 0.4);
+      background: #ffffff;
+    }
+
+    .chat-send-btn {
+      border-radius: 999px;
+      border: none;
+      padding: 8px 14px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      cursor: pointer;
+      background: linear-gradient(135deg, #00f2ea, #3b82f6);
+      color: #020617;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 16px rgba(59, 130, 246, 0.35);
+      transition: transform 0.1s ease, box-shadow 0.1s ease, filter 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .chat-send-btn span {
+      font-size: 0.95em;
+    }
+
+    .chat-send-btn:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 18px rgba(37, 99, 235, 0.45);
+    }
+
+    .chat-send-btn:active {
+      transform: translateY(0);
+      box-shadow: 0 4px 10px rgba(37, 99, 235, 0.35);
+    }
+
+    .disclaimer {
+      margin-top: 12px;
+      font-size: 0.72rem;
+      color: #6b7280;
+      text-align: right;
+      opacity: 0.9;
+    }
+
+    .disclaimer strong {
+      color: #111827;
+    }
+
+    .video-label {
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #9ca3af;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .video-label-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(148, 163, 184, 0.6),
+        transparent
+      );
+      max-width: 120px;
+    }
+
+    /* ====== BARRA FIXA SUPERIOR ====== */
+    .top-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 54px;
+      background: #ffffff;
+      border-bottom: 1px solid #e5e7eb;
+      backdrop-filter: blur(12px);
+      z-index: 999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    .top-bar-inner {
+      width: 100%;
+      max-width: 960px;
+      padding: 0 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.9rem;
+    }
+
+    .top-bar-logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      color: #020617;
+    }
+
+    .top-bar-logo-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #000;
+    }
+
+    .top-bar-logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
+    }
+
+    .top-bar-balance {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(34, 197, 94, 0.08);
+      border: 1px solid rgba(34, 197, 94, 0.9);
+      color: #166534;
+      font-weight: 600;
+      font-size: 0.86rem;
+      box-shadow: 0 8px 16px rgba(22, 163, 74, 0.28);
+    }
+
+    .top-bar-balance-symbol {
+      font-size: 0.85rem;
+      color: #16a34a;
+      opacity: 0.95;
+    }
+
+    /* empurra o conteúdo pra baixo da barra */
+    .page {
+      margin-top: 64px;
+    }
+
+    /* ====== BOTÃO PAGAMENTO ====== */
+    .pay-button-wrapper {
+      display: flex;
+      justify-content: center;
+      margin: 14px 0 6px;
+    }
+
+.pay-button {
+  border: none;
+  border-radius: 999px;
+  padding: 12px 22px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  background: linear-gradient(135deg, #52ab00, #029f00);
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.25);
+  letter-spacing: 0.02em;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, filter 0.12s ease;
+  text-align: center;
+  min-width: 260px;
+
+  /* 👇 ADICIONAR */
+  animation: pulseSoft 1.4s infinite;
+  transform-origin: center;
+}
+
+
+    .pay-button::before {
+      content: "💳";
+      font-size: 1rem;
+    }
+
+    .pay-button:hover {
+      filter: brightness(1.05);
+      transform: translateY(-1px);
+      box-shadow: 0 18px 32px rgba(15, 23, 42, 0.3);
+    }
+
+    .pay-button:active {
+      transform: translateY(0);
+      box-shadow: 0 10px 20px rgba(15, 23, 42, 0.22);
+    }
+    @keyframes pulseSoft {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.25);
+  }
+  50% {
+    transform: scale(1.035); /* pulsar BEM leve */
+    box-shadow: 0 18px 36px rgba(15, 23, 42, 0.32);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 14px 28px rgba(15, 23, 42, 0.25);
+  }
+}
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="top-bar-inner">
+      <div class="top-bar-logo">
+        <div class="top-bar-logo-icon">
+          <img src="https://i.postimg.cc/pLS7zm0B/Design-sem-nome-(10).png" alt="kwai" />
+        </div>
+      </div>
+</div>
+      <div class="top-bar-balance">
+        <span class="top-bar-balance-symbol">R$</span>
+        <span>4.596,72</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="page">
+    <div 
+    </div>
+
+    <h1 class="headline">Atenção! Se sair, você perderá todo seu saldo acumulado.</h1>
+    <p class="subheadline">Assista o vídeo abaixo</p>
+
+    <div class="video-wrapper">
+      <div class="video-inner">
+        <vturb-smartplayer
+          id="vid-693f6fc9b50e82e7e2e3288d"
+          style="display: block; margin: 0 auto; width: 100%;"
+        ></vturb-smartplayer>
+        <script type="text/javascript">
+          var s = document.createElement("script");
+          s.src =
+            "https://scripts.converteai.net/e25befdb-22aa-48d2-b119-7ea3daf9509d/players/693f6fc9b50e82e7e2e3288d/v4/player.js";
+          s.async = !0;
+          document.head.appendChild(s);
+        </script>
+      </div>
+    </div>
+
+    <div class="pay-button-wrapper">
+  <button class="pay-button" id="payButton">
+    Pagar Tarifa e Receber R$4.596,72
+  </button>
+</div>
+
+
+    <p class="hint-text">Após o pagamento, você receberá todo o valor da taxa junto ao valor do bônus!</p>
+
+    <div class="main-grid">
+      <div></div>
+
+      <aside class="chat-card">
+        <header class="chat-header">
+          <div class="chat-title">
+            <div class="live-pill">
+              <span class="live-dot"></span>
+              <span>AO VIVO</span>
+            </div>
+            <span>Kwai Chat</span>
+          </div>
+          <span class="chat-beta"></span>
+        </header>
+
+        <div id="chatMessages" class="chat-messages">
+          </div>
+
+        <div class="chat-input-area">
+          <input
+            id="chatInput"
+            class="chat-input"
+            type="text"
+            placeholder="Envie uma mensagem para o chat..."
+          />
+          <button id="chatSendBtn" class="chat-send-btn">
+            <span>Enviar</span> 💬
+          </button>
+        </div>
+      </aside>
+    </div>
+
+
+    </p>
+  </div>
+
+  <script>
+    const chatMessagesEl = document.getElementById("chatMessages");
+    const chatInputEl = document.getElementById("chatInput");
+    const chatSendBtn = document.getElementById("chatSendBtn");
+
+    const fakeNames = [
+      "Ana",
+      "Lucas",
+      "Bruno",
+      "Carla",
+      "Rafa",
+      "Fernanda",
+      "João",
+      "Marina",
+      "Pablo",
+      "Vitória",
+      "Leo",
+      "Thiago",
+      "Gabi",
+      "Caio",
+      "Juliana",
+      "Nath",
+      "Rafaela",
+      "Pedro",
+      "Sofia",
+      "Henrique",
+      "Amanda",
+      "Kauã",
+      "Bia",
+      "Lara",
+      "Vini",
+      "Diego",
+      "Isabela",
+      "Murilo",
+      "Tatiane",
+      "Carol",
+      "Hugo",
+      "César",
+      "Brenda",
+      "Letícia",
+      "Nicole",
+      "Igor",
+      "Felipe",
+      "Davi",
+      "Giovana"
+    ];
+
+    // >>> EDITE OS COMENTÁRIOS AQUI (adicione, remova ou altere mensagens à vontade)
+    const fakeMessages = [
+      "acabei de receber aqui",
+      "Meu caiu em 3 minutos certinho!",
+      "Tava desconfiado, mas funcionou mesmo.",
+      "funciona mesmo, caiu o pix aqui",
+      "Pix pingou aqui agora, sem erro.",
+      "ta bala, pix na conta papi",
+      "podem confiar",
+      "Aqui deu certo, boraaaa!",
+      "Recebi 80 reais, achei que fosse troll.",
+      "Seguindo o passo a passo certinho deu bom.",
+      "deu bom",
+      "caiuuu o pixxxxx aaaaaaaaa TE AMO KWAI",
+      "gente, É REAL!!",
+      "Pix caiu na hora!!!",
+      "Sim, cai na mesma hora mano",
+      "Já compartilhei com meu irmão também.",
+      "Se sair da página perde mesmo, já testei kkk",
+      "vale mt a pena!!!",
+      "O meu demorou uns 5 minutos, mas caiu.",
+      "Alguém sabe se dá pra fazer mais de uma vez?",
+      "Vi um amigo recebendo e vim tentar.",
+      "Aqui caiu certo",
+      "deu certinho",
+      "Só acredito porque já caiu na minha conta",
+      "O chat tá rápido demais, nem consigo ler tudo.",
+      "Parece live de lançamento isso aqui kkk",
+      "Meu banco até notificou na hora!!!! CAIU 1K AQUI OBRIGADO Kwai",
+      "caiuuuuuu, pode ir dentro gente",
+      "Quem fechou a página se arrependeu, certeza.",
+      "Já comprei meu lanche com o saldo 😂",
+      "PIX NA CONTA BEBEEE",
+      "Usei a mesma conta do Kwai e deu certo aqui pelo menos pprt",
+      "Aqui caiu valor redondo, gostei pra krl",
+      "Alguém recebeu mais de uma vez?",
+      "Fiquei 2 minutos e já caiu bizarroooo",
+      "É REALLLLLLL",
+      "Nem vou atualizar a página, vai que some",
+      "aqui caiu emm",
+      "fml aqui deu certooooooo",
+      "recebi",
+      "recebi aqui tambem",
+      "ACABOU DE CAIRRR AAAAA",
+      "Tá fazendo diferença real no meu mês",
+      "Nunca vi o Kwai pagar assim, tô chocado",
+      "UIAAAAA CAIU O PIX GENTE, PODE CONFIAR NELES",
+      "da certo sim",
+      "ano q vem tinha q ter isso dnv pqp",
+      "Tô aqui só torcendo pra cair de novo 😂",
+      "deu bom",
+      "caiu 6k aqui MEU DEUS É REAL GENT",
+      "caiu 3k aqui no pixxx aaaaa",
+      "acabou de cairt 10k",
+      "Aqui pingou 7k",
+      "Pigou 2k aqui",
+      "Só vim testar e acabei recebendo 4 MIL REAIS kkk",
+      "Caiu ai tambem, aq acabo de cai o pic",
+      "caiu aquiiiii",
+      "certinho aq :)",
+      "Fiquem de olho que pinga quando menos espera",
+      "O melhor push que o Kwai já mandou"
+    ];
+
+    function getRandomItem(arr) {
+      return arr[Math.floor(Math.random() * arr.length)];
+    }
+
+    function addMessage(name, text, isUser = false) {
+      const row = document.createElement("div");
+      row.className = "chat-row" + (isUser ? " user-message" : "");
+
+      const avatar = document.createElement("div");
+      avatar.className = "chat-avatar";
+      avatar.textContent = name.charAt(0).toUpperCase();
+
+      const content = document.createElement("div");
+      content.className = "chat-content";
+
+      const nameEl = document.createElement("div");
+      nameEl.className = "chat-name";
+      nameEl.textContent = isUser ? "Você" : name;
+
+      const textEl = document.createElement("div");
+      textEl.className = "chat-text";
+      textEl.textContent = text;
+
+      content.appendChild(nameEl);
+      content.appendChild(textEl);
+      row.appendChild(avatar);
+      row.appendChild(content);
+
+      chatMessagesEl.appendChild(row);
+
+      // Limitar quantidade para não pesar a página
+      const maxMessages = 120;
+      while (chatMessagesEl.children.length > maxMessages) {
+        chatMessagesEl.removeChild(chatMessagesEl.firstChild);
+      }
+
+      // Scroll sempre no final
+      chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+    }
+
+    function addRandomChatMessage() {
+      const name = getRandomItem(fakeNames);
+      const msg = getRandomItem(fakeMessages);
+      addMessage(name, msg, false);
+    }
+
+    // Popular inicial
+    for (let i = 0; i < 18; i++) {
+      addRandomChatMessage();
+    }
+
+    // Fluxo contínuo de mensagens (estilo live rápida)
+    setInterval(addRandomChatMessage, 900);
+
+    // Enviar mensagem do usuário
+    function handleSend() {
+      const value = chatInputEl.value.trim();
+      if (!value) return;
+      addMessage("Você", value, true);
+      chatInputEl.value = "";
+      chatInputEl.focus();
+    }
+
+    chatSendBtn.addEventListener("click", handleSend);
+    chatInputEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        handleSend();
+      }
+    });
+  </script>
+<script>
+  document.getElementById("payButton").addEventListener("click", function (e) {
+    e.preventDefault(); 
+
+    // URL de Checkout Definida
+    const checkoutUrl = "https://kwwretiradasofc.online/checkout/";
+    const targetUrl = new URL(checkoutUrl);
+
+    // 1. Pega parametros da URL atual
+    const currentParams = new URLSearchParams(window.location.search);
+    currentParams.forEach((value, key) => {
+        targetUrl.searchParams.set(key, value);
+    });
+
+    // 2. Pega todos os dados do LocalStorage (Nome, Email, CPF, UTMs)
+    // Isso garante o PREENCHIMENTO AUTOMÁTICO
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const value = localStorage.getItem(key);
+
+        if (value) {
+            // Só adiciona se o parametro já não existir na URL final
+            if (!targetUrl.searchParams.has(key)) {
+                 targetUrl.searchParams.set(key, value);
+            }
+        }
+    }
+
+    // 3. Compatibilidade extra (garante que 'nome' vire 'name' se necessário)
+    if (targetUrl.searchParams.has('nome') && !targetUrl.searchParams.has('name')) {
+        targetUrl.searchParams.set('name', targetUrl.searchParams.get('nome'));
+    }
+    if (targetUrl.searchParams.has('doc') && !targetUrl.searchParams.has('cpf')) {
+         targetUrl.searchParams.set('cpf', targetUrl.searchParams.get('doc'));
+    }
+
+    // Redireciona
+    window.location.href = targetUrl.toString();
+  });
+</script>
+</body>
+</html>
